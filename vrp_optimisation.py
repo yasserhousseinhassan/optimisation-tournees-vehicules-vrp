@@ -25,7 +25,19 @@ Dépendances : numpy (obligatoire) ; pulp (optionnel, résolution exacte)
 ============================================================================
 """
 
+import sys
 import numpy as np
+
+# Sortie console en UTF-8 (symboles : ->, é, è...)
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+# matplotlib optionnel (sauvegarde des figures en PNG)
+try:
+    import matplotlib.pyplot as plt
+    _HAS_PLT = True
+except ImportError:
+    _HAS_PLT = False
 
 
 # ---------------------------------------------------------------------------
@@ -146,6 +158,43 @@ def reconstruire_tournees(arcs_actifs):
 
 
 # ---------------------------------------------------------------------------
+# Visualisation : tracé géographique des tournées
+# ---------------------------------------------------------------------------
+def tracer_tournees(coords, tournees, titre="Tournées de véhicules (CVRP)",
+                    fichier="figure_tournees_vrp.png"):
+    if not _HAS_PLT:
+        print("  (matplotlib absent : graphique ignoré)")
+        return
+    fig, ax = plt.subplots(figsize=(8, 7))
+    couleurs = plt.cm.tab10(np.linspace(0, 1, max(len(tournees), 1)))
+
+    # Clients et dépôt
+    ax.scatter(coords[1:, 0], coords[1:, 1], c="black", s=60, zorder=3)
+    ax.scatter(coords[0, 0], coords[0, 1], c="red", marker="s", s=200,
+               zorder=4, label="Dépôt")
+    for i, (x, y) in enumerate(coords):
+        ax.annotate(str(i), (x, y), fontsize=9, xytext=(4, 4),
+                    textcoords="offset points")
+
+    # Arcs de chaque tournée
+    for k, (tournee, c) in enumerate(zip(tournees, couleurs), 1):
+        pts = coords[tournee]
+        ax.plot(pts[:, 0], pts[:, 1], "-", color=c, lw=2, alpha=0.8,
+                label=f"Véhicule {k}")
+        # flèches de sens de parcours
+        for a, b in zip(tournee[:-1], tournee[1:]):
+            ax.annotate("", xy=coords[b], xytext=coords[a],
+                        arrowprops=dict(arrowstyle="->", color=c, alpha=0.6))
+
+    ax.set_title(titre)
+    ax.set_xlabel("x"); ax.set_ylabel("y")
+    ax.legend(loc="best", fontsize=8); ax.grid(alpha=0.3)
+    fig.tight_layout()
+    fig.savefig(fichier, dpi=130)
+    print(f"\n  Figure enregistrée : {fichier}")
+
+
+# ---------------------------------------------------------------------------
 # Démonstration
 # ---------------------------------------------------------------------------
 def _demonstration():
@@ -170,6 +219,9 @@ def _demonstration():
         charge = sum(demandes[i] for i in t)
         print(f"  Véhicule {k} : {t}  (charge = {charge}/{Q})")
     print(f"  Distance totale = {cout:.1f}")
+
+    tracer_tournees(coords, tournees,
+                    titre=f"Tournées heuristiques (coût = {cout:.1f})")
 
     print("\n--- EXACT (PLNE / MTZ) ---")
     try:

@@ -107,7 +107,13 @@ pip install numpy pulp        # pulp (solveur CBC) pour la résolution exacte
 python vrp_optimisation.py
 ```
 
-Le script génère une instance aléatoire, résout par l'heuristique puis (si un solveur est disponible) par PLNE/MTZ, et affiche l'**écart relatif** entre la solution heuristique et l'optimum global.
+Le script génère une instance aléatoire, résout par l'heuristique puis (si un solveur est disponible) par PLNE/MTZ, et affiche l'**écart relatif** entre la solution heuristique et l'optimum global. Une figure est enregistrée sous `figure_tournees_vrp.png`.
+
+### 4.5 Visualisation
+
+![Tournées de véhicules](figure_tournees_vrp.png)
+
+Représentation géographique des tournées : le **dépôt** (carré rouge), les **clients** (points noirs numérotés), et les arcs orientés de chaque **véhicule** (une couleur par tournée). Chaque tournée part et revient au dépôt en respectant la contrainte de capacité.
 
 > **Note.** Le rapport original utilise **IBM ILOG CPLEX**. Le script propose ici une formulation portable via **PuLP** (solveur CBC libre), substituable par CPLEX. La visualisation cartographique (`folium`) génère une carte HTML interactive sur fond géographique réel.
 
@@ -131,6 +137,7 @@ La méthode exacte est privilégiée pour les petits réseaux exigeant une solut
 | Fichier | Description |
 |---|---|
 | `vrp_optimisation.py` | Script Python : heuristique + formulation exacte PLNE/MTZ. |
+| `figure_tournees_vrp.png` | Figure générée : tracé géographique des tournées. |
 | `Optimisation_Combinatoire.ipynb` | Notebook : CPLEX, heuristique, carte interactive. |
 | `Optimisation_Combinatoire.pdf` | Rapport : équations, résultats, cartographie. |
 | `README.md` | Le présent document. |
